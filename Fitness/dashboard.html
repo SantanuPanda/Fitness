@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FITPRO - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.4.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        :root {
+            --primary-color: #111317;
+            --primary-color-light: #1f2125;
+            --primary-color-extra-light: #35373b;
+            --secondary-color: #f9ac54;
+            --secondary-color-dark: #d79447;
+            --text-light: #d1d5db;
+            --white: #ffffff;
+            --sidebar-width: 250px;
+            --header-height: 70px;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+            background-color: var(--primary-color);
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(to bottom, var(--primary-color-light), var(--primary-color-extra-light));
+            color: var(--white);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            z-index: 100;
+            box-shadow: 3px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar-logo img {
+            height: 40px;
+            width: auto;
+            margin-right: 10px;
+        }
+
+        .sidebar-logo h2 {
+            color: var(--secondary-color);
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+
+        .menu-category {
+            padding: 10px 20px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--text-light);
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .menu-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background-color: rgba(249, 172, 84, 0.1);
+            border-left: 3px solid var(--secondary-color);
+        }
+
+        .menu-item i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+            color: var(--secondary-color);
+        }
+
+        .menu-item span {
+            font-size: 0.95rem;
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+
+        .user-info {
+            text-align: left;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-status {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            overflow-x: hidden;
+        }
+
+        .dashboard-header {
+            height: var(--header-height);
+            background-color: var(--primary-color-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: var(--sidebar-width);
+            z-index: 99;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--white);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .header-actions button {
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-left: 15px;
+            position: relative;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--secondary-color);
+            color: var(--white);
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .content-area {
+            padding: 30px;
+            margin-top: var(--header-height);
+        }
+
+        /* Dashboard Content Styles */
+        .dashboard-section {
+            display: none;
+        }
+
+        .dashboard-section.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .dashboard-card {
+            background: linear-gradient(to bottom right, var(--primary-color-light), var(--primary-color-extra-light));
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            background-color: rgba(249, 172, 84, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .card-icon i {
+            font-size: 1.5rem;
+            color: var(--secondary-color);
+        }
+
+        .card-title {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 5px;
+        }
+
+        .card-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--white);
+        }
+
+        .card-comparison {
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+
+        .card-increase {
+            color: #4cd964;
+        }
+
+        .card-decrease {
+            color: #ff3b30;
+        }
+
+        .dashboard-chart {
+            background: linear-gradient(to bottom right, var(--primary-color-light), var(--primary-color-extra-light));
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--white);
+        }
+
+        .chart-filters {
+            display: flex;
+        }
+
+        .chart-filter {
+            padding: 5px 15px;
+            margin-left: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .chart-filter.active {
+            background-color: var(--secondary-color);
+            color: var(--white);
+        }
+
+        .chart-placeholder {
+            height: 250px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+        }
+
+        .dashboard-table {
+            background: linear-gradient(to bottom right, var(--primary-color-light), var(--primary-color-extra-light));
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .table-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--white);
+        }
+
+        .table-view-all {
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            text-align: left;
+            padding: 12px 15px;
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-light);
+            font-weight: 500;
+            font-size: 0.9rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        tbody td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--white);
+            font-size: 0.9rem;
+        }
+
+        tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .status-completed {
+            background-color: #4cd964;
+        }
+
+        .status-in-progress {
+            background-color: #ffcc00;
+        }
+
+        .status-pending {
+            background-color: #ff3b30;
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 991px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .dashboard-header {
+                left: 0;
+            }
+            .mobile-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <img src="assets/logo.png" alt="Logo">
+                    <h2>FITPRO</h2>
+                </div>
+                <button class="sidebar-toggle">
+                    <i class="ri-menu-line"></i>
+                </button>
+            </div>
+
+            <div class="sidebar-menu">
+                <div class="menu-category">MAIN</div>
+                <div class="menu-item active" data-section="dashboard">
+                    <i class="ri-dashboard-line"></i>
+                    <span>Dashboard</span>
+                </div>
+                <div class="menu-item" data-section="profile">
+                    <i class="ri-user-line"></i>
+                    <span>Profile</span>
+                </div>
+                <div class="menu-item" data-section="progress">
+                    <i class="ri-line-chart-line"></i>
+                    <span>Progress Tracking</span>
+                </div>
+                <div class="menu-item" data-section="workouts">
+                    <i class="ri-timer-line"></i>
+                    <span>Workout History</span>
+                </div>
+                <div class="menu-item" data-section="achievements">
+                    <i class="ri-trophy-line"></i>
+                    <span>Achievements</span>
+                </div>
+                
+                <div class="menu-category">NUTRITION</div>
+                <div class="menu-item" data-section="meal-planning">
+                    <i class="ri-restaurant-line"></i>
+                    <span>Meal Planning</span>
+                </div>
+                <div class="menu-item" data-section="calorie-calculator">
+                    <i class="ri-calculator-line"></i>
+                    <span>Calorie Calculator</span>
+                </div>
+                <div class="menu-item" data-section="recipes">
+                    <i class="ri-book-2-line"></i>
+                    <span>Recipe Database</span>
+                </div>
+                
+                <div class="menu-category">COMMUNITY</div>
+                <div class="menu-item" data-section="community">
+                    <i class="ri-group-line"></i>
+                    <span>Member Forums</span>
+                </div>
+                <div class="menu-item" data-section="trainers">
+                    <i class="ri-calendar-check-line"></i>
+                    <span>Book A Trainer</span>
+                </div>
+                
+                <div class="menu-category">TOOLS</div>
+                <div class="menu-item" data-section="bmi">
+                    <i class="ri-scales-line"></i>
+                    <span>BMI Calculator</span>
+                </div>
+                <div class="menu-item" data-section="goals">
+                    <i class="ri-flag-line"></i>
+                    <span>Goal Setting</span>
+                </div>
+                
+                <div class="menu-category">SHOP</div>
+                <div class="menu-item" data-section="shop">
+                    <i class="ri-shopping-bag-line"></i>
+                    <span>E-commerce Shop</span>
+                </div>
+                
+                <div class="menu-category">SUPPORT</div>
+                <div class="menu-item" data-section="ai-chatbot">
+                    <i class="ri-robot-line"></i>
+                    <span>AI Chatbot</span>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        <i class="ri-user-fill"></i>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">John Doe</div>
+                        <div class="user-status">Premium Member</div>
+                    </div>
+                </div>
+                <button class="btn" style="width: 100%;">
+                    <i class="ri-logout-box-line"></i> Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <div class="dashboard-header">
+                <button class="mobile-toggle">
+                    <i class="ri-menu-line"></i>
+                </button>
+                <div class="page-title">Dashboard</div>
+                <div class="header-actions">
+                    <button>
+                        <i class="ri-notification-3-line"></i>
+                        <span class="notification-badge">3</span>
+                    </button>
+                    <button>
+                        <i class="ri-settings-3-line"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <!-- Dashboard Section -->
+                <div class="dashboard-section active" id="dashboard-section">
+                    <div class="dashboard-cards">
+                        <div class="dashboard-card">
+                            <div class="card-icon">
+                                <i class="ri-heart-pulse-line"></i>
+                            </div>
+                            <div class="card-title">Current Weight</div>
+                            <div class="card-value">168 lbs</div>
+                            <div class="card-comparison card-decrease">
+                                <i class="ri-arrow-down-line"></i> 2.5 lbs this month
+                            </div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="card-icon">
+                                <i class="ri-fire-line"></i>
+                            </div>
+                            <div class="card-title">Calories Burned</div>
+                            <div class="card-value">8,942</div>
+                            <div class="card-comparison card-increase">
+                                <i class="ri-arrow-up-line"></i> 12% vs last week
+                            </div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="card-icon">
+                                <i class="ri-timer-line"></i>
+                            </div>
+                            <div class="card-title">Workout Time</div>
+                            <div class="card-value">5.2 hrs</div>
+                            <div class="card-comparison card-increase">
+                                <i class="ri-arrow-up-line"></i> 0.8 hrs this week
+                            </div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="card-icon">
+                                <i class="ri-award-line"></i>
+                            </div>
+                            <div class="card-title">Achievements</div>
+                            <div class="card-value">12</div>
+                            <div class="card-comparison">
+                                <i class="ri-medal-line"></i> 2 new this month
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-chart">
+                        <div class="chart-header">
+                            <div class="chart-title">Fitness Progress</div>
+                            <div class="chart-filters">
+                                <div class="chart-filter">Week</div>
+                                <div class="chart-filter active">Month</div>
+                                <div class="chart-filter">Year</div>
+                            </div>
+                        </div>
+                        <div class="chart-placeholder">
+                            [Weight & Workout Progress Chart]
+                        </div>
+                    </div>
+
+                    <div class="dashboard-table">
+                        <div class="table-header">
+                            <div class="table-title">Recent Workouts</div>
+                            <div class="table-view-all">View All</div>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Workout</th>
+                                    <th>Duration</th>
+                                    <th>Calories</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>May 15, 2023</td>
+                                    <td>Upper Body Strength</td>
+                                    <td>45 min</td>
+                                    <td>380</td>
+                                    <td><span class="status-indicator status-completed"></span> Completed</td>
+                                </tr>
+                                <tr>
+                                    <td>May 14, 2023</td>
+                                    <td>HIIT Cardio</td>
+                                    <td>30 min</td>
+                                    <td>450</td>
+                                    <td><span class="status-indicator status-completed"></span> Completed</td>
+                                </tr>
+                                <tr>
+                                    <td>May 12, 2023</td>
+                                    <td>Lower Body Focus</td>
+                                    <td>50 min</td>
+                                    <td>420</td>
+                                    <td><span class="status-indicator status-completed"></span> Completed</td>
+                                </tr>
+                                <tr>
+                                    <td>May 10, 2023</td>
+                                    <td>Core Strength</td>
+                                    <td>35 min</td>
+                                    <td>320</td>
+                                    <td><span class="status-indicator status-completed"></span> Completed</td>
+                                </tr>
+                                <tr>
+                                    <td>May 8, 2023</td>
+                                    <td>Full Body Workout</td>
+                                    <td>60 min</td>
+                                    <td>520</td>
+                                    <td><span class="status-indicator status-completed"></span> Completed</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Other sections would be implemented similar to the dashboard section -->
+                <div class="dashboard-section" id="profile-section">
+                    <h2 style="color: var(--white); margin-bottom: 20px;">Profile Settings</h2>
+                    <p style="color: var(--text-light);">Profile content would appear here...</p>
+                </div>
+
+                <div class="dashboard-section" id="progress-section">
+                    <h2 style="color: var(--white); margin-bottom: 20px;">Progress Tracking</h2>
+                    <p style="color: var(--text-light);">Progress tracking content would appear here...</p>
+                </div>
+
+                <!-- Additional section placeholders would follow the same pattern -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle sidebar on mobile
+            const sidebarToggle = document.querySelector('.sidebar-toggle');
+            const mobileSidebarToggle = document.querySelector('.mobile-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('open');
+                });
+            }
+            
+            if (mobileSidebarToggle) {
+                mobileSidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('open');
+                });
+            }
+            
+            // Handle menu item clicks to show different sections
+            const menuItems = document.querySelectorAll('.menu-item');
+            const pageTitle = document.querySelector('.page-title');
+            
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Update active class on menu items
+                    menuItems.forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Update page title
+                    pageTitle.textContent = this.querySelector('span').textContent;
+                    
+                    // Show selected section
+                    const sectionId = this.getAttribute('data-section');
+                    const sections = document.querySelectorAll('.dashboard-section');
+                    
+                    sections.forEach(section => {
+                        section.classList.remove('active');
+                    });
+                    
+                    const activeSection = document.getElementById(sectionId + '-section');
+                    if (activeSection) {
+                        activeSection.classList.add('active');
+                    } else {
+                        // If section doesn't exist yet, show under construction message
+                        const dashboardSection = document.getElementById('dashboard-section');
+                        dashboardSection.classList.add('active');
+                        
+                        // You could show a toast/notification here that the section is coming soon
+                        alert('This section is coming soon!');
+                    }
+                    
+                    // Close sidebar on mobile after selection
+                    if (window.innerWidth < 992) {
+                        sidebar.classList.remove('open');
+                    }
+                });
+            });
+        });
+    </script>
+
+    <script src="dashboard.js"></script>
+</body>
+</html> 
